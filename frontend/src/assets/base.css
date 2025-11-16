@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Ukrycie dla przeglądarek opartych na Webkit (Chrome, Safari, nowszy Edge) */
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+/* Ukrycie dla Internet Explorer i starszego Edge */
+.scrollbar-hidden {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
