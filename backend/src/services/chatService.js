@@ -1,45 +1,51 @@
-import { ChatOpenAI } from '@langchain/openai'
-import { ChatOllama } from '@langchain/ollama'
 import { PromptTemplate } from '@langchain/core/prompts'
-import { StructuredOutputParser } from '@langchain/core/output_parsers'
 import { StringOutputParser } from '@langchain/core/output_parsers'
-import { z } from 'zod'
-import { Client } from 'langsmith'
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain'
-
-const langsmithConfig = {
-  apiKey: 'YOUR_LANGSMITH_API_KEY', // Twój klucz API
-  apiUrl: 'https://api.smith.langchain.com', // Domyślny adres, zmień jeśli używasz self-hosted
-  projectName: 'nazwa-twojego-projektu-vue', // Opcjonalnie: nazwa projektu
-}
-
-const langsmithClient = new Client(langsmithConfig)
-
-const tracer = new LangChainTracer({
-  client: langsmithClient,
-})
-
-const llm = new ChatOpenAI({
-  model: 'gpt-3.5-turbo',
-  apiKey: OPENAI_API_KEY,
-  streaming: true,
-})
-
-// const llm = new ChatOllama({
-//   model: 'gpt-oss:latest',
-//   temperature: 0,
-// })
+import { gpt, CHAT_TIMEOUT } from '../llms/gpt/chat.js'
+import { FIELD_REQUIRED_MESSAGE, EMPTY_FIELD_MESSAGE, EXCEED_TOKENS_LIMIT_MESSAGE, TIMEOUT_MESSAGE } from '../constants/errors.js'
+import { CHAT_MODEL, MAX_TOKENS  } from '../llms/gpt/chat.js'
+import { countTokens } from '../utils/countTokens.js'
 
 const prompt = new PromptTemplate({
   inputVariables: ['topic'],
   template: 'Opisz temat w maksymalnie trzech zadaniach. Temat: {topic}',
 })
 
-const chain = prompt.pipe(llm).pipe(new StringOutputParser())
-//const result = chain.invoke({ topic: 'uczenie maszynowe' })
+const chain = prompt.pipe(gpt).pipe(new StringOutputParser())
 
-//result.then(r => console.log(r))
+const validateMessage = (message) => {
+  if (message === null) 
+    throw new ApiError(400, FIELD_REQUIRED_MESSAGE('message'))
 
-// for await (const chunk of stream) {
-//   console.log(chunk)
-// }
+  if (message === '')
+    throw new ApiError(400, EMPTY_FIELD_MESSAGE('message'))
+
+  const tokens = countTokens(CHAT_MODEL, message)
+
+  if (tokens > MAX_TOKENS) 
+    throw new ApiError(400, EXCEED_TOKENS_LIMIT_MESSAGE(tokens, MAX_TOKENS))
+}
+
+export const chat = async (message) => {
+  validateMessage(message)
+
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => {
+    controller.abort(); 
+  }, process.env.APP_TIMEOUT_MS);
+
+  try {
+    const result = await chain.invoke({ topic: message, signal: controller.signal });
+  }
+  catch (err) {
+    if (err.name === 'AbortError') {
+      throw new ApiError(408, AI_TIMEOUT_MESSAGE(CHAT_TIMEOUT))
+    }
+
+    throw err
+  }
+  finally { 
+    clearTimeout(timeout);
+  }
+}
+

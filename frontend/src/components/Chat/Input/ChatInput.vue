@@ -1,12 +1,11 @@
 <template>
   <div
-    class="flex flex-row"  
+    class="flex flex-row relative"  
   >
     <input 
       type="text" 
       v-model="messageInput" 
       placeholder="Wpisz wiadomość..." 
-      @keyup.enter="handleSendMessage"
       class="h-full flex-1 bg-gray-300 p-4 text-gray-950 rounded-l-md !rounded-t-none inset-shadow-2xs outline-0 focus:shadow-xs"
     />
     <button 
@@ -15,23 +14,45 @@
     >
       Wyślij
     </button>
+    <div v-if="errorMessage" 
+      class="absolute text-md w-full p-2 bg-rose-300 text-white text-sm bottom-full"
+    >
+      {{ errorMessage }}
+    </div>
   </div>
 </template>
 
 <script setup>
 import { sendMessage } from '@/api/chatService';
+import { debounce } from 'lodash';
 import { ref } from 'vue';
 
-const messageInput = ref(null)
+const DEBOUNCE_TIME = 5000
 
-const handleSendMessage = async () => {
-  const data = await sendMessage('witaj')
-}
+const messageInput = ref(null)
+const errorMessage = ref(null)
+const isLoading = ref(null)
+
+const handleSendMessage = debounce(
+  async () => {
+    isLoading.value = true
+    const { result, error } = await sendMessage(messageInput.value)
+
+    errorMessage.value = error?.message
+
+    if (result)
+      messageInput.value = null
+
+    isLoading.value = false
+  }, 
+  DEBOUNCE_TIME,
+  { leading: true, trailing: true }
+);
+
+
 
 /** todo
  * 1. Zabezpieczenie przed wysyłaniem zbyt długich zapytań (liczenie tokenów)
- * 2. Wyświetlanie błedów
- * 3. Zabezpieczenie przed wysyłaniem zbyt dużej ilości zapytań w krótkim czasie
  * 4. Oczyszczenie z danych osobowych przed wysłaniem do OpenAI
  */
 </script>

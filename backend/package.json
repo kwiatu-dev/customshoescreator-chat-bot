@@ -12,14 +12,20 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@dqbd/tiktoken": "^1.0.22",
+    "@langchain/classic": "^1.0.5",
     "@langchain/core": "^1.0.5",
     "@langchain/ollama": "^1.0.1",
     "@langchain/openai": "^1.1.1",
+    "connect-timeout": "^1.9.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
     "langchain": "^1.0.4",
-    "langsmith": "^0.3.79"
+    "langsmith": "^0.3.79",
+    "p-limit": "^7.2.0",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"

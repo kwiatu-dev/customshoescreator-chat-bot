@@ -1,7 +1,13 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import timeout from 'connect-timeout';
+import { rateLimiterMiddleware } from './middleware/rateLimiterMiddleware.js'
+import { appConcurrencyMiddleware } from './middleware/appConcurrencyMiddleware.js'
+import { perIpConcurrencyMiddleware } from './middleware/perIpConcurrencyMiddleware.js'
+import { loggingMiddleware } from './middleware/loggingMiddleware.js'
 import chatRoutes from './routes/chatRoutes.js'
+import { logger } from './utils/logger.js';
 
 dotenv.config();
 
@@ -14,8 +20,13 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use('/api', chatRoutes); 
+app.use(timeout(process.env.APP_TIMEOUT_MS));
+app.use(rateLimiterMiddleware);
+app.use(loggingMiddleware)
+app.use(appConcurrencyMiddleware)
+app.use('/api', perIpConcurrencyMiddleware, chatRoutes); 
+app.use(errorHandlingMiddleware)
 
 app.listen(PORT, () => {
-    console.log(`🤖 Chatbot API działa na porcie: ${PORT}`);
+    logger.info(`🤖 Chatbot API działa na porcie: ${PORT}`);
 });
