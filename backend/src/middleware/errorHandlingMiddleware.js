@@ -13,20 +13,12 @@ export const errorHandlingMiddleware = (err, req, res, next) => {
     });
 
     if (req.timedout) {
-        return res.status(408).json({ 
-            error: TIMEOUT_MESSAGE(process.env.APP_TIMEOUT_MS)
-        });
+        return res.status(408).json(ApiResult.failed(new ApiError(408, TIMEOUT_MESSAGE(process.env.APP_TIMEOUT_MS))));
     }
 
     if (err instanceof ApiError) {
-        return res.status(err.status).json({
-            result: null,
-            error: { message: err.message },
-        });
+        return res.status(err.status).json(ApiResult.failed(err));
     }
 
-    return res.status(500).json({
-        result: null,
-        error: { message: GLOBAL_ERROR_MESSAGE() },
-    });
+    return res.status(500).json(ApiResult.failed(new ApiError(500, GLOBAL_ERROR_MESSAGE())));
 };
