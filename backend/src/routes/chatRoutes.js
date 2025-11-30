@@ -7,7 +7,8 @@ const router = Router();
 router.post('/chat', async (req, res) => {
     const message = req.body.message
 
-    return res.json(new ApiResult(await chat(message)));
+    if (!res.headersSent)
+        return res.json(ApiResult.success(await chat(message)));
 });
 
 export default router;

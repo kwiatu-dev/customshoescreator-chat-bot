@@ -1,19 +1,28 @@
 import pLimit from 'p-limit';
-import { CONCURRENCY_LIMIT_MESSAGE } from '../constants/errors.js'
-import { CONCURRENCY_INFO_MESSAGE } from '../constants/info.js'
+import { CONCURRENCY_LIMIT_MESSAGE } from '../constants/errors.js';
+import { CONCURRENCY_INFO_MESSAGE } from '../constants/info.js';
+import { TOO_MANY_REQUEST_CODE } from '../constants/httpCodes.js';
+import { ApiError } from '../utils/ApiError.js'; 
+import { logger } from '../utils/logger.js'; 
 
-const appConcurrencyLimit = pLimit(process.env.APP_CONCURRENCY ?? 10); 
+const APP_CONCURRENCY_LIMIT = parseInt(process.env.APP_CONCURRENCY_LIMIT);
+const appConcurrencyLimit = pLimit(APP_CONCURRENCY_LIMIT);
 
-export const appConcurrencyMiddleware = (handler) => async (req, res, next) => {
-    try {
-        await appConcurrencyLimit(async () => {
-            const active = appConcurrencyLimit.activeCount;
-            const max = appConcurrencyLimit.concurrency;
-            logger.info(CONCURRENCY_INFO_MESSAGE(active, max))
-            await next()
-        });
+export const appConcurrencyMiddleware = async (req, res, next) => {
+    if (appConcurrencyLimit.activeCount >= APP_CONCURRENCY_LIMIT && appConcurrencyLimit.pendingCount > 0) {
+        throw new ApiError(TOO_MANY_REQUEST_CODE, CONCURRENCY_LIMIT_MESSAGE());
     }
-    catch (err) {
-        throw new ApiError(429, CONCURRENCY_LIMIT_MESSAGE())
+
+    try {
+        await appConcurrencyLimit(() => {
+            return new Promise((resolve) => {
+                res.on('finish', resolve);
+                res.on('close', resolve);
+                
+                next();
+            });
+        });
+    } catch (err) {
+        next(err);
     }
 };

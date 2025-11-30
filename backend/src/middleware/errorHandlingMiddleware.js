@@ -1,9 +1,28 @@
 import { logger } from '../utils/logger.js';
+import { ApiResult } from '../utils/ApiResult.js';
 import { ApiError } from '../utils/ApiError.js';
 import { GLOBAL_ERROR_MESSAGE, TIMEOUT_MESSAGE } from '../constants/errors.js'
+import { INTERNAL_SERVER_ERROR_CODE, REQUEST_TIMEOUT_CODE } from '../constants/httpCodes.js';
+
+const TIMEOUT_MS = process.env.APP_TIMEOUT_MS
 
 export const errorHandlingMiddleware = (err, req, res, next) => {
-    logger.error('Error occurred', {
+    if (res.headersSent) {
+        return next(err);
+    }
+
+    if (err instanceof ApiError) {
+        return res.status(err.status).json(
+            ApiResult.failed(err));
+    }
+
+    if (req.timeout || err.code === 'ETIMEDOUT') {
+        return res.status(REQUEST_TIMEOUT_CODE).json(
+            ApiResult.failed(new ApiError(REQUEST_TIMEOUT_CODE, TIMEOUT_MESSAGE(TIMEOUT_MS)))
+        );
+    }
+
+    logger.error('Wystąpił nieznany błąd:', {
         method: req.method,
         url: req.originalUrl,
         ip: req.ip,
@@ -12,13 +31,7 @@ export const errorHandlingMiddleware = (err, req, res, next) => {
         stack: err.stack,
     });
 
-    if (req.timedout) {
-        return res.status(408).json(ApiResult.failed(new ApiError(408, TIMEOUT_MESSAGE(process.env.APP_TIMEOUT_MS))));
-    }
-
-    if (err instanceof ApiError) {
-        return res.status(err.status).json(ApiResult.failed(err));
-    }
-
-    return res.status(500).json(ApiResult.failed(new ApiError(500, GLOBAL_ERROR_MESSAGE())));
+    return res.status(INTERNAL_SERVER_ERROR_CODE).json(
+        ApiResult.failed(
+            new ApiError(INTERNAL_SERVER_ERROR_CODE, GLOBAL_ERROR_MESSAGE())));
 };

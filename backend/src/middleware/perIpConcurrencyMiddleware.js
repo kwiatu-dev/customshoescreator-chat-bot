@@ -1,31 +1,48 @@
 import pLimit from 'p-limit';
-import { ApiError } from '../utils/ApiError.js';
-import { CONCURRENCY_LIMIT_MESSAGE } from '../constants/errors.js';
+import { ApiError } from '../utils/ApiError.js'; 
+import { TOO_MANY_REQUEST_CODE } from '../constants/httpCodes.js';
+import { USER_CONCURRENCY_LIMIT_MESSAGE } from '../constants/errors.js';
 
-const ipLimiters = new Map(); 
+const ipLimiters = new Map();
+const CONCURRENCY_LIMIT = parseInt(process.env.USER_CONCURRENCY_LIMIT);
 
-export const perIpConcurrencyPerIpMiddleware = () => async (req, res, next) => {
+export const perIpConcurrencyMiddleware = () => async (req, res, next) => {
   const ip = req.ip;
 
   if (!ipLimiters.has(ip)) {
-    ipLimiters.set(ip, pLimit(process.env.USER_CONCURRENCY_LIMIT));
+    ipLimiters.set(ip, pLimit(CONCURRENCY_LIMIT));
   }
-
   const limiter = ipLimiters.get(ip);
 
+
+  if (limiter.activeCount >= CONCURRENCY_LIMIT && limiter.pendingCount > 0) {
+      throw new ApiError(TOO_MANY_REQUEST_CODE, USER_CONCURRENCY_LIMIT_MESSAGE());
+  }
+
   try {
-    await limiter(async () => {
-      const active = limiter.activeCount;
-      const max = limiter.concurrency;
-      logger.info(CONCURRENCY_INFO_MESSAGE(active, max))
-      await next()
+    await limiter(() => {
+      return new Promise((resolve, reject) => {
+        const onFinished = () => {
+          if (limiter.activeCount <= 1 && limiter.pendingCount === 0) {
+            ipLimiters.delete(ip);
+          }
+          resolve(); 
+        };
+
+        res.on('finish', onFinished);
+        res.on('close', onFinished);
+        res.on('error', (err) => {
+            onFinished();
+        });
+
+        try {
+            next();
+        } catch (error) {
+            reject(error);
+        }
+      });
     });
   } catch (err) {
-    throw new ApiError(429, CONCURRENCY_LIMIT_MESSAGE());
-  } 
-  finally {
-    if (limiter.activeCount === 0) {
-      ipLimiters.delete(ip);
-    }
+    next(err);
   }
 };
