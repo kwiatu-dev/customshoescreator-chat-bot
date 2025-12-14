@@ -3,7 +3,7 @@ import cors from 'cors';
 import timeout from 'connect-timeout';
 import { rateLimitMiddleware } from './middleware/rateLimitMiddleware.js'
 import { globalConcurrencyMiddleware } from './middleware/globalConcurrencyMiddleware.js'
-import { perIpConcurrencyMiddleware } from './middleware/perIpConcurrencyMiddleware.js'
+import { userConcurrencyMiddleware } from './middleware/userConcurrencyMiddleware.js'
 import { loggingMiddleware } from './middleware/loggingMiddleware.js'
 import { errorHandlingMiddleware } from './middleware/errorHandlingMiddleware.js'
 import chatRoutes from './routes/chatRoutes.js'
@@ -23,9 +23,8 @@ app.use(loggingMiddleware);
 app.use(getAuthMiddleware());
 app.use(rateLimitMiddleware);
 app.use(globalConcurrencyMiddleware)
-//app.use(perIpConcurrencyMiddleware)
+app.use(userConcurrencyMiddleware)
 app.use('/api', chatRoutes); 
 app.use(errorHandlingMiddleware)
-
 
 export default app;

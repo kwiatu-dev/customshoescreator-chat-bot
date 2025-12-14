@@ -5,6 +5,7 @@ export const mockUser = {
 };
 
 export const mockAuthMiddleware = (req, res, next) => {
-  req.user = mockUser;
+  const userId = req.headers['x-user-id'] || mockUser.id;
+  req.user = { id: userId };
   next();
 };

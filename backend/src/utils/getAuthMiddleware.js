@@ -1,5 +1,5 @@
-import { authMiddleware } from "../middleware/authMiddleware";
-import { mockAuthMiddleware } from "../middleware/mockAuthMiddleware";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { mockAuthMiddleware } from "../middleware/mockAuthMiddleware.js";
 
 export const getAuthMiddleware = () => {
     if (process.env.NODE_ENV === 'test') {
