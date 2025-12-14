@@ -22,7 +22,7 @@ const validateMessage = (message) => {
 
   const tokens = countTokens(CHAT_MODEL, message)
 
-  if (tokens > MAX_TOKENS) 
+  if (tokens > MAX_TOKENS || true) 
     throw new ApiError(BAD_REQUEST_CODE, EXCEED_TOKENS_LIMIT_MESSAGE(tokens, MAX_TOKENS))
 }
 

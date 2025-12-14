@@ -1,13 +1,20 @@
-import tiktokenLite from '@dqbd/tiktoken/lite';
-import baseEncoding from '@dqbd/tiktoken/encoders/cl100k_base.json' with { type: 'json' };
+import { encoding_for_model } from '@dqbd/tiktoken';
 
-const { encoding_for_model } = tiktokenLite;
-const encoder = null;
+const encoders = new Map();
+
+const getEncoderForModel = (model) => {
+  if (!encoders.has(model)) {
+    encoders.set(model, encoding_for_model(model));
+  }
+
+  return encoders.get(model);
+};
 
 export const countTokens = (model, text) => {
-    if (!encoder) {
-        encoder = encoding_for_model(model, baseEncoding)
-    }
+  if (typeof text !== 'string') {
+    throw new TypeError('text must be a string');
+  }
 
-    return encoder.encode(text).length
-}
+  const encoder = getEncoderForModel(model);
+  return encoder.encode(text).length;
+};

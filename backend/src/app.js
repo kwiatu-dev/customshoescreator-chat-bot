@@ -20,7 +20,7 @@ app.use(cors({
 app.use(express.json());
 app.use(timeout(TIMEOUT_MS));
 app.use(loggingMiddleware);
-app.use(getAuthMiddleware());
+//app.use(getAuthMiddleware());
 app.use(rateLimitMiddleware);
 app.use(globalConcurrencyMiddleware)
 app.use(userConcurrencyMiddleware)

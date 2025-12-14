@@ -1,26 +1,33 @@
 import pLimit from 'p-limit';
-import { CONCURRENCY_LIMIT_MESSAGE } from '../constants/errors.js';
+import { GLOBAL_CONCURRENCY_LIMIT_MESSAGE } from '../constants/errors.js';
 import { TOO_MANY_REQUEST_CODE } from '../constants/httpCodes.js';
 import { ApiError } from '../utils/ApiError.js'; 
 
-const GLOBAL_CONCURRENCY_LIMIT = parseInt(process.env.GLOBAL_CONCURRENCY_LIMIT);
-const globalConcurrencyLimit = pLimit(GLOBAL_CONCURRENCY_LIMIT);
+const GLOBAL_CONCURRENCY_LIMIT = Number(process.env.GLOBAL_CONCURRENCY_LIMIT);
+const globalLimiter = pLimit(GLOBAL_CONCURRENCY_LIMIT);
 
 export const globalConcurrencyMiddleware = async (req, res, next) => {
-    if (globalConcurrencyLimit.activeCount >= GLOBAL_CONCURRENCY_LIMIT && globalConcurrencyLimit.pendingCount > 0) {
-        throw new ApiError(TOO_MANY_REQUEST_CODE, CONCURRENCY_LIMIT_MESSAGE());
-    }
+  if (globalLimiter.activeCount >= GLOBAL_CONCURRENCY_LIMIT) {
+    return next(
+      new ApiError(
+        TOO_MANY_REQUEST_CODE,
+        GLOBAL_CONCURRENCY_LIMIT_MESSAGE()
+      )
+    );
+  }
 
-    try {
-        await globalConcurrencyLimit(() => {
-            return new Promise((resolve) => {
-                res.on('finish', resolve);
-                res.on('close', resolve);
-                
-                next();
-            });
-        });
-    } catch (err) {
-        next(err);
-    }
+  try {
+    await globalLimiter(() => {
+      return new Promise((resolve) => {
+        const release = () => resolve();
+
+        res.once('finish', release);
+        res.once('close', release);
+
+        next();
+      });
+    });
+  } catch (err) {
+    next(err);
+  }
 };
