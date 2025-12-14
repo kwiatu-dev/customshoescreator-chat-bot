@@ -2,11 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import timeout from 'connect-timeout';
 import { rateLimitMiddleware } from './middleware/rateLimitMiddleware.js'
-import { appConcurrencyMiddleware } from './middleware/appConcurrencyMiddleware.js'
+import { globalConcurrencyMiddleware } from './middleware/globalConcurrencyMiddleware.js'
 import { perIpConcurrencyMiddleware } from './middleware/perIpConcurrencyMiddleware.js'
 import { loggingMiddleware } from './middleware/loggingMiddleware.js'
 import { errorHandlingMiddleware } from './middleware/errorHandlingMiddleware.js'
 import chatRoutes from './routes/chatRoutes.js'
+import { getAuthMiddleware } from './utils/getAuthMiddleware.js';
 
 const app = express();
 const TIMEOUT_MS = process.env.APP_TIMEOUT_MS;
@@ -18,10 +19,11 @@ app.use(cors({
 
 app.use(express.json());
 app.use(timeout(TIMEOUT_MS));
-app.use(loggingMiddleware)
+app.use(loggingMiddleware);
+app.use(getAuthMiddleware());
 app.use(rateLimitMiddleware);
-app.use(appConcurrencyMiddleware)
-app.use(perIpConcurrencyMiddleware)
+app.use(globalConcurrencyMiddleware)
+//app.use(perIpConcurrencyMiddleware)
 app.use('/api', chatRoutes); 
 app.use(errorHandlingMiddleware)
 

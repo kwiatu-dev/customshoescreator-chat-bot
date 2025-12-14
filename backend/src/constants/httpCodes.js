@@ -2,3 +2,4 @@ export const REQUEST_TIMEOUT_CODE = 408;
 export const INTERNAL_SERVER_ERROR_CODE = 500;
 export const BAD_REQUEST_CODE = 400;
 export const TOO_MANY_REQUEST_CODE = 429;
+export const UNAUTHORIZED = 401;

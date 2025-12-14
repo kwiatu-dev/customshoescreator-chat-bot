@@ -1,8 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test'});
-
 const { default: app } = await import('../app.js');
-const { rateLimitMiddleware } = await import('../middleware/rateLimitMiddleware.js');
 const { errorHandlingMiddleware } = await import('../middleware/errorHandlingMiddleware.js');
 
 import request from 'supertest';
@@ -11,14 +7,9 @@ import { TIMEOUT_MESSAGE } from '../constants/errors.js';
 
 const TIMEOUT_MS = parseInt(process.env.APP_TIMEOUT_MS);
 
-describe('Middleware Timeout', () => {
+describe('Timeout Middleware Test', () => {
   jest.setTimeout(TIMEOUT_MS + 10000); 
   const timers = []
-
-  beforeEach(() => {
-      rateLimitMiddleware.resetKey('::ffff:127.0.0.1');
-      rateLimitMiddleware.resetKey('127.0.0.1');
-  });
 
   afterAll(() => {
     timers.forEach((timer) => timer.unref())

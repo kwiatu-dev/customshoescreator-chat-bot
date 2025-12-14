@@ -1,8 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.test'});
-
 const { default: app } = await import('../app.js');
-const { rateLimitMiddleware } = await import('../middleware/rateLimitMiddleware.js');
 const { errorHandlingMiddleware } = await import('../middleware/errorHandlingMiddleware.js');
 
 import request from 'supertest';
@@ -13,18 +9,13 @@ import { TOO_MANY_REQUEST_CODE } from '../constants/httpCodes.js';
 const LIMIT = parseInt(process.env.RATE_LIMIT);
 const WINDOW_MS = parseInt(process.env.RATE_WINDOW_MS);
 
-describe('Rate Limit Middleware', () => {
+describe('Rate Limit Middleware Test', () => {
     beforeAll(() => {
         app.get('/test-ratelimit', (req, res) => {
-            res.status(200).json({ message: 'ok' });
+            res.status(200).json({ message: 'ok', userId: req.user.id });
         });
 
         app.use(errorHandlingMiddleware)
-    });
-
-    beforeEach(() => {
-        rateLimitMiddleware.resetKey('::ffff:127.0.0.1');
-        rateLimitMiddleware.resetKey('127.0.0.1');
     });
 
     afterEach(() => {
@@ -41,32 +32,27 @@ describe('Rate Limit Middleware', () => {
     });
 
     it(`powinien zablokować żądania po przekroczeniu limitu (${LIMIT}) i zwrócić poprawny błąd`, async () => {
-        const requests = [];
-        for (let i = 0; i < LIMIT + 1; i++) {
-            requests.push(request(app).get('/test-ratelimit'));
+        for (let i = 0; i < LIMIT; i++) {
+            const res = await request(app).get('/test-ratelimit');
+            expect(res.status).toBe(200);
         }
 
-        const responses = await Promise.all(requests);
-        const blockedResponse = responses.find(r => r.status === TOO_MANY_REQUEST_CODE);
-
-        expect(blockedResponse).toBeDefined();
-
-        if (blockedResponse) {
-            expect(blockedResponse.status).toBe(TOO_MANY_REQUEST_CODE);
-            expect(blockedResponse.body).toHaveProperty('error');
-            expect(blockedResponse.body.error.message).toBe(RATE_LIMIT_MESSAGE());
-        }
+        const blocked = await request(app).get('/test-ratelimit');
+        expect(blocked.status).toBe(TOO_MANY_REQUEST_CODE);
+        expect(blocked.body.error.message).toBe(RATE_LIMIT_MESSAGE());
     });
+
 
     it('powinien odblokować żądania po upływie czasu okna (RATE_WINDOW_MS)', async () => {
         jest.useFakeTimers();
 
         const requests = [];
+
         for (let i = 0; i < LIMIT; i++) {
             requests.push(request(app).get('/test-ratelimit'));
         }
-        await Promise.all(requests);
 
+        await Promise.all(requests);
         const blocked = await request(app).get('/test-ratelimit');
         expect(blocked.status).toBe(TOO_MANY_REQUEST_CODE);
 

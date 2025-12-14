@@ -18,18 +18,21 @@
       class="absolute text-md w-full p-2 bg-rose-300 text-white text-sm bottom-full"
     >
       {{ errorMessage }}
+      <button v-if="errorStatus === 401" class="underline cursor-pointer" @click="renewAuth">Kliknij, aby odświeżyć sesje!</button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { sendMessage } from '@/api/chatService';
+import { requestAuth } from '@/utils/requestAuth';
 import { debounce } from 'lodash';
 import { ref } from 'vue';
 
 const DEBOUNCE_TIME = 5000
 
 const messageInput = ref(null)
+const errorStatus = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(null)
 
@@ -38,6 +41,7 @@ const handleSendMessage = debounce(
     isLoading.value = true
     const { result, error } = await sendMessage(messageInput.value)
 
+    errorStatus.value = error?.status
     errorMessage.value = error?.message
 
     if (result)
@@ -49,7 +53,11 @@ const handleSendMessage = debounce(
   { leading: true, trailing: true }
 );
 
-
+const renewAuth = () => {
+  requestAuth()
+  errorMessage.value = null
+  errorStatus.value = null
+}
 
 /** todo
  * 1. Zabezpieczenie przed wysyłaniem zbyt długich zapytań (liczenie tokenów)

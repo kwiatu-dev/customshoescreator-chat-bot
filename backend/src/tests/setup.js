@@ -1,4 +1,20 @@
-import { jest, beforeEach } from '@jest/globals';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.test'});
+
+import { jest, beforeAll, beforeEach, afterEach } from '@jest/globals';
+import { mockUser } from '../middleware/mockAuthMiddleware.js';
+const { rateLimitMiddleware } = await import('../middleware/rateLimitMiddleware.js');
+
+beforeEach(() => {
+  rateLimitMiddleware.resetKey(mockUser.id.toString());
+  rateLimitMiddleware.resetKey('127.0.0.1');
+  rateLimitMiddleware.resetKey('::ffff:127.0.0.1');
+});
+
+afterEach(() => {
+  rateLimitMiddleware.resetKey(mockUser.id.toString());
+});
+
 
 const silenceConsole = () => {
   if (global.console._stdout) {

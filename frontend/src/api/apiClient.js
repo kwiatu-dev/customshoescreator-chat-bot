@@ -1,3 +1,4 @@
+import { authState } from '@/store/authStore';
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -9,6 +10,13 @@ const apiClient = axios.create({
         'Content-Type': 'application/json',
     },
     timeout: 5000, 
+});
+
+apiClient.interceptors.request.use((config) => {
+  if (authState.token) {
+    config.headers.Authorization = `Bearer ${authState.token}`;
+  }
+  return config;
 });
 
 apiClient.interceptors.response.use(

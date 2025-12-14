@@ -1,10 +1,2 @@
-1. Uruchomienie aplikacji 
-2. Testy 
-a) limit ilości zapytań na ip w określonym czasie
-b) timeout aplikacji
-c) timeout modelu jezykowego
-d) logowanie 
-e) limit rownoczesnych wykonywanych zapytan przez ip
-f) limit rownoczesnych wykonywanych zapytan przez cala aplikacje
-g) zwracanie bledow i wynikow
-3. Dodanie autoryzacji przy pomocy tokena JWT
+- Zastanowić się nad blokadą zapytań, które nie są związane z systemem. Innymi słowy zablokować użytkownikowi możliwość zadawania pytań ogólnych.
+- Zastanowić się, czy założyć użytkownikom blokadę na ilość wygenerowanych tokenów (dzienna, tygodniowa, miesięczna, roczna)

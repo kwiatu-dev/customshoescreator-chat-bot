@@ -11,7 +11,9 @@
   "jest": {
     "testEnvironment": "node",
     "transform": {},
-    "setupFilesAfterEnv": ["./src/tests/setup.js"]
+    "setupFilesAfterEnv": [
+      "./src/tests/setup.js"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -23,6 +25,7 @@
     "@langchain/core": "^1.0.5",
     "@langchain/ollama": "^1.0.1",
     "@langchain/openai": "^1.1.1",
+    "axios": "^1.13.2",
     "connect-timeout": "^1.9.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

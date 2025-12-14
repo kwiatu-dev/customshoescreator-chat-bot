@@ -1,21 +1,25 @@
-import { reactive } from "vue"
+import { requestAuth } from "@/utils/requestAuth.js"
+import { authState, setAuth } from "@/store/authStore"
 
 export const setupPostMessageListener = (app) => {
-    const authUserData = reactive({
-        data: null,
-    })
+    const LARAVEL_APP_BASE_URL = import.meta.env.VITE_LARAVEL_APP_BASE_URL
+    const RESPONSE_TYPE = 'AUTH_TOKEN'
 
     const handlePostMessage = (event) => {
         const data = event.data
+        const origin = event.origin
 
-        if (data && data.type === 'user_data' && data.payload) {
-            authUserData.data = data.payload
-            window.removeEventListener('message', handlePostMessage)
+        if (origin !== LARAVEL_APP_BASE_URL) return
+
+        if (data && data.type === RESPONSE_TYPE && data.payload) {
+            console.log(`Otrzymano postMessage ${RESPONSE_TYPE} od ${LARAVEL_APP_BASE_URL}`)
+            setAuth(event.data.payload)
         }
     }
 
     window.addEventListener('message', handlePostMessage)
-    app.provide('authUserData', authUserData)
+    app.provide('authStore', authState)
+    requestAuth()
 
     return app
 }

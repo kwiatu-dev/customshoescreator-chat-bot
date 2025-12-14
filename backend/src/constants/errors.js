@@ -7,3 +7,5 @@ export const USER_CONCURRENCY_LIMIT_MESSAGE = () => 'Masz zbyt dużo aktywnych r
 export const GLOBAL_ERROR_MESSAGE = () => `Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.`
 export const TIMEOUT_MESSAGE = (timeout) => `Przekroczono czas oczekiwania na odpowiedź. Spróbuj ponownie później.`
 export const AI_TIMEOUT_MESSAGE = (timeout) => `Przekroczono czas oczekiwania na odpowiedź od serwera AI.Spróbuj ponownie później.`
+export const UNAUTHORIZED_MESSAGE = () => `Brak dostępu.`
+export const INVALID_TOKEN_MESSAGE = () => `Nieprawidłowy token.`
