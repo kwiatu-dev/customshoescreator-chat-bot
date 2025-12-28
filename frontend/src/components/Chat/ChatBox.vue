@@ -2,7 +2,7 @@
   <div 
   class="flex flex-col justify-start"
     :class="[
-      'fixed bg-gray-100 right-4 bottom-10 mb-14 rounded-2xl shadow-lg chatbox-size flex flex-col overflow-hidden text-white popup',
+      'bg-gray-100 rounded-2xl shadow-lg flex flex-col overflow-hidden text-white popup',
       show ? 'show' : 'hide'
     ]"
   >
@@ -40,7 +40,7 @@ const emit = defineEmits(['close'])
 }
 
 .chatbox-messages {
-  height: calc(600px - 80px - 64px);
+  height: calc(100vh - 80px - 64px - 55px - 0.5rem - 40px);
 }
 
 @media (max-width: 1024px) {
@@ -49,9 +49,7 @@ const emit = defineEmits(['close'])
     height: 80vh;
   }
 
-  .chatbox-messages {
-    height: calc(80vh - 80px - 64px);
-  }
+
 }
 
 @keyframes gradient-shift {

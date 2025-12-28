@@ -25,7 +25,9 @@
 
 <script setup>
 import { sendMessage } from '@/api/chatService';
+import { redirectToRoute } from '@/utils/redirectToRoute';
 import { requestAuth } from '@/utils/requestAuth';
+import { sendDataToPrefill } from '@/utils/sendDataToPrefill';
 import { debounce } from 'lodash';
 import { ref } from 'vue';
 
@@ -36,22 +38,27 @@ const errorStatus = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(null)
 
-const handleSendMessage = debounce(
-  async () => {
-    isLoading.value = true
-    const { result, error } = await sendMessage(messageInput.value)
+const handleSendMessage = async () => {
+  await redirectToRoute('projects.create', null)
+  const test = await sendDataToPrefill({ title: 'test', type_id: 1, created_by_user_id: 1, client_id: 1 })
+}
 
-    errorStatus.value = error?.status
-    errorMessage.value = error?.message
+// const handleSendMessage = debounce(
+//   async () => {
+//     isLoading.value = true
+//     const { result, error } = await sendMessage(messageInput.value)
 
-    if (result)
-      messageInput.value = null
+//     errorStatus.value = error?.status
+//     errorMessage.value = error?.message
 
-    isLoading.value = false
-  }, 
-  DEBOUNCE_TIME,
-  { leading: true, trailing: true }
-);
+//     if (result)
+//       messageInput.value = null
+
+//     isLoading.value = false
+//   }, 
+//   DEBOUNCE_TIME,
+//   { leading: true, trailing: true }
+// );
 
 const renewAuth = () => {
   requestAuth()

@@ -2,7 +2,7 @@ import { PromptTemplate } from '@langchain/core/prompts'
 import { StringOutputParser } from '@langchain/core/output_parsers'
 import { FIELD_REQUIRED_MESSAGE, EMPTY_FIELD_MESSAGE, EXCEED_TOKENS_LIMIT_MESSAGE, AI_TIMEOUT_MESSAGE } from '../constants/errors.js'
 import { gpt, CHAT_MODEL, MAX_TOKENS, CHAT_TIMEOUT  } from '../llms/gpt/chat.js'
-import { countTokens } from '../utils/countTokens.js'
+//import { countTokens } from '../utils/countTokens.js'
 import { ApiError } from '../utils/ApiError.js'
 import { BAD_REQUEST_CODE, REQUEST_TIMEOUT_CODE } from '../constants/httpCodes.js'
 
@@ -20,7 +20,10 @@ const validateMessage = (message) => {
   if (message === '')
     throw new ApiError(BAD_REQUEST_CODE, EMPTY_FIELD_MESSAGE('message'))
 
-  const tokens = countTokens(CHAT_MODEL, message)
+
+  //TODO Zrób poprawne liczenie tokenów na podstawie konwersacji i nowej wiadomości
+  //Zachowuj informacje o zuzytych tokenach 
+  //const tokens = countTokens(CHAT_MODEL, message)
 
   if (tokens > MAX_TOKENS || true) 
     throw new ApiError(BAD_REQUEST_CODE, EXCEED_TOKENS_LIMIT_MESSAGE(tokens, MAX_TOKENS))
