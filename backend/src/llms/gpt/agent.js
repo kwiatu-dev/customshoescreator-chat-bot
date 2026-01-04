@@ -4,5 +4,5 @@ import { gpt } from "./chat.js";
 
 export const agent = createAgent({
     model: gpt,
-    tools: tools
+    tools: tools,
 })

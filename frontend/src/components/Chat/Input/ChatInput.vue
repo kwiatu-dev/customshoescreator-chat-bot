@@ -38,27 +38,27 @@ const errorStatus = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(null)
 
-const handleSendMessage = async () => {
-  await redirectToRoute('projects.create', null)
-  const test = await sendDataToPrefill({ title: 'test', type_id: 1, created_by_user_id: 1, client_id: 1 })
-}
+// const handleSendMessage = async () => {
+//   await redirectToRoute('projects.create', null)
+//   const test = await sendDataToPrefill({ title: 'test', type_id: 1, created_by_user_id: 1, client_id: 1 })
+// }
 
-// const handleSendMessage = debounce(
-//   async () => {
-//     isLoading.value = true
-//     const { result, error } = await sendMessage(messageInput.value)
+const handleSendMessage = debounce(
+  async () => {
+    isLoading.value = true
+    const { result, error } = await sendMessage(messageInput.value)
 
-//     errorStatus.value = error?.status
-//     errorMessage.value = error?.message
+    errorStatus.value = error?.status
+    errorMessage.value = error?.message
 
-//     if (result)
-//       messageInput.value = null
+    if (result)
+      messageInput.value = null
 
-//     isLoading.value = false
-//   }, 
-//   DEBOUNCE_TIME,
-//   { leading: true, trailing: true }
-// );
+    isLoading.value = false
+  }, 
+  DEBOUNCE_TIME,
+  { leading: true, trailing: true }
+);
 
 const renewAuth = () => {
   requestAuth()

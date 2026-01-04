@@ -1,2 +1,5 @@
 - Zastanowić się nad blokadą zapytań, które nie są związane z systemem. Innymi słowy zablokować użytkownikowi możliwość zadawania pytań ogólnych.
 - Zastanowić się, czy założyć użytkownikom blokadę na ilość wygenerowanych tokenów (dzienna, tygodniowa, miesięczna, roczna)
+
+
+https://reference.langchain.com/javascript/functions/_langchain_classic.agents.createReactAgent.html

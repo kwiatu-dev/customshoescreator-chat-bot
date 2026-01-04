@@ -13,14 +13,14 @@ const app = express();
 const TIMEOUT_MS = process.env.APP_TIMEOUT_MS;
 
 app.use(cors({
-    origin: ['http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:5173'], 
+    origin: [process.env.LARAVEL_API_URL, process.env.FRONTEND_URL], 
     methods: 'GET,POST',
 }));
 
 app.use(express.json());
 app.use(timeout(TIMEOUT_MS));
 app.use(loggingMiddleware);
-//app.use(getAuthMiddleware());
+app.use(getAuthMiddleware());
 app.use(rateLimitMiddleware);
 app.use(globalConcurrencyMiddleware)
 app.use(userConcurrencyMiddleware)
