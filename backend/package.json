@@ -35,6 +35,7 @@
     "express-rate-limit": "^8.2.1",
     "langchain": "^1.2.3",
     "langsmith": "^0.3.79",
+    "mysql2": "^3.16.0",
     "p-limit": "^7.2.0",
     "winston": "^3.18.3"
   },

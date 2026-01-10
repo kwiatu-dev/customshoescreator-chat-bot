@@ -33,7 +33,7 @@ import { ref } from 'vue';
 
 const DEBOUNCE_TIME = 5000
 
-const messageInput = ref(null)
+const messageInput = ref(`Dodaj projekt o tytule 'Ślubne' przypisz go do realizacji przez test2@example.com dla klienta wkonieczny@example.com. Projekt jest do zrealizowania do przyszłego miesiąca. Biorąc pod uwagę, że będzie realizowany około 3 tygodnie ustaw odpowiednią datę rozpoczęcia. Koszt wializacji 50 zł oraz koszt zlecenia 500 zł.`)
 const errorStatus = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(null)
@@ -66,10 +66,6 @@ const renewAuth = () => {
   errorStatus.value = null
 }
 
-/** todo
- * 1. Zabezpieczenie przed wysyłaniem zbyt długich zapytań (liczenie tokenów)
- * 4. Oczyszczenie z danych osobowych przed wysłaniem do OpenAI
- */
 </script>
 
 <style scoped>
