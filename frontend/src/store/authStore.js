@@ -1,19 +1,31 @@
 import { reactive } from 'vue';
 
+let resolveAuthPromise = null;
+
 export const authState = reactive({
   token: null,
   user: null,
-  isAuthenticated: false,
+  authPromise: null,
 });
+
+const initAuthPromise = () => {
+  authState.authPromise = new Promise((resolve) => {
+    resolveAuthPromise = resolve;
+  });
+};
 
 export const setAuth = ({ token, user }) => {
   authState.token = token;
   authState.user = user;
-  authState.isAuthenticated = true;
+
+  if (resolveAuthPromise) {
+    resolveAuthPromise();
+  }
 };
 
 export const clearAuth = () => {
   authState.token = null;
   authState.user = null;
-  authState.isAuthenticated = false;
 };
+
+initAuthPromise();

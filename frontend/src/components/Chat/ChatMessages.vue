@@ -40,9 +40,21 @@
 </template>
 
 <script setup>
+import apiClient from '@/api/apiClient';
 import ChatBubble from '@/components/Chat/Message/ChatBubble.vue'
+import { authState } from '@/store/authStore';
+import { onMounted } from 'vue';
+
+onMounted(async () => {
+    await authState.authPromise
+    const { result, error } = await apiClient.get('/conversation')
+
+    console.log(result)
+    console.log(error)
+})
 
 
 //** todo
 // 1. wyświetlić instrukcje, jeżeli nie rozpoczęto konwersacji */
+// 2. Załaduj konwersacje
 </script>

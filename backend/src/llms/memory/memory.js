@@ -1,11 +1,11 @@
-import { mysqlPool } from './database.js'
-import { SQLChatMessageHistory } from "langchain/stores/message/sql";
-import { BufferMemory } from "langchain/memory";
+import { pool } from './database.js'
+import { PostgresChatMessageHistory } from "@langchain/community/stores/message/postgres";
+import { BufferMemory } from "@langchain/classic/memory";
 
-const createMemory = (conversationId) => {
-  const chatHistory = new SQLChatMessageHistory({
+export const createMemory = (conversationId) => {
+  const chatHistory = new PostgresChatMessageHistory({
     sessionId: conversationId,
-    pool: mysqlPool,
+    pool: pool,
     tableName: "chat_messages",
   });
 

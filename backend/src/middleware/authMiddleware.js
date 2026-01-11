@@ -1,7 +1,7 @@
 import { ApiError } from '../utils/ApiError.js'
-import axios from 'axios'
 import { UNAUTHORIZED } from '../constants/httpCodes.js'
 import { UNAUTHORIZED_MESSAGE, INVALID_TOKEN_MESSAGE } from '../constants/errors.js'
+import axios from 'axios'
 
 export const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
