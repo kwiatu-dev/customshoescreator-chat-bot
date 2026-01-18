@@ -3,8 +3,8 @@ import dayjs from 'dayjs'
 import { MAIN_PROMPT } from '../llms/prompts/main_prompt.js'
 import { createMemory } from '../llms/memory/memory.js'
 
-export const chat = async (message, signal, user = null) => {
-  const memory = createMemory(conversationId)
+export const chat = async (sessionId, message, signal, user = null) => {
+  const memory = createMemory(sessionId)
   const { chat_history } = await memory.loadMemoryVariables({});
 
   const prompt = await MAIN_PROMPT.invoke({
@@ -25,15 +25,10 @@ export const chat = async (message, signal, user = null) => {
 
   await memory.saveContext(
     { input: message },
-    { output: result.answer }
+    { output: result.answer } //zastanowic sie czy zapisac tools_cools i inne parametry do bazy danych
   )
 
   return result
-  //TODO: 
-  // 1. dodać schemat przechowujacy konwersacje zgodny z langchain do bazy danych
-  // 2. utworzyć tablicę przechowująca aktywną konwersacje użytkownika
-  // 3. frontend wysyła conversationId
-  // 4.
 }
 
 const formatUserData = (user) => ({
@@ -44,7 +39,7 @@ const formatUserData = (user) => ({
 
 const processMessages = (messages) => {
   if (!messages) return;
-  if (!Array.isArray(messages) && !messages.length) return;
+  if (!Array.isArray(messages) || messages.length === 0) return;
 
   const answer = getAnswer(messages)
   const artifacts = getArtifacts(messages)
@@ -53,15 +48,16 @@ const processMessages = (messages) => {
 }
 
 const getAnswer = (messages) => {
-  return messages[messages.length - 1]?.kwargs?.content
+  const lastMessage = messages[messages.length - 1];
+
+  return lastMessage.content ?? null;
 }
 
 const getArtifacts = (messages) => {
   const artifacts = []
 
   for (const message of messages) {
-    const kwargs = message.kwargs
-    const artifact = kwargs?.artifact
+    const artifact = message?.artifact
 
     if (artifact) {
       artifacts.push(artifact)

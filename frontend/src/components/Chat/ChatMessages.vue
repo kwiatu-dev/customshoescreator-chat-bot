@@ -1,6 +1,6 @@
 <template>
      <div class="flex flex-col p-4 gap-4">
-        <ChatBubble 
+        <!-- <ChatBubble 
             type="llm"
             :time="new Date()"
             message="That's awesome. I think our users will really appreciate the improvements."
@@ -35,24 +35,24 @@
             :time="new Date()"
             message="That's awesome. I think our users will really appreciate the improvements."
             status="Delivered"
-        />
+        /> -->
+        <div class="text-black">SessionId: {{ conversationStore.sessionId }}</div>
+        <div class="text-black">
+            {{ conversationStore.messages }}
+        </div>
     </div>
 </template>
 
 <script setup>
-import apiClient from '@/api/apiClient';
 import ChatBubble from '@/components/Chat/Message/ChatBubble.vue'
-import { authState } from '@/store/authStore';
+import { useConversationStore } from '@/stores/conversation.store.js'
 import { onMounted } from 'vue';
 
+const conversationStore = useConversationStore()
+
 onMounted(async () => {
-    await authState.authPromise
-    const { result, error } = await apiClient.get('/conversation')
-
-    console.log(result)
-    console.log(error)
+    conversationStore.loadConversationOnce()
 })
-
 
 //** todo
 // 1. wyświetlić instrukcje, jeżeli nie rozpoczęto konwersacji */

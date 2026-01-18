@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { sendMessage } from '@/api/chatService';
+import { useConversationStore } from '@/stores/conversation.store.js'
 import { redirectToRoute } from '@/utils/redirectToRoute';
 import { requestAuth } from '@/utils/requestAuth';
 import { sendDataToPrefill } from '@/utils/sendDataToPrefill';
@@ -38,6 +38,8 @@ const errorStatus = ref(null)
 const errorMessage = ref(null)
 const isLoading = ref(null)
 
+const conversationStore = useConversationStore()
+
 // const handleSendMessage = async () => {
 //   await redirectToRoute('projects.create', null)
 //   const test = await sendDataToPrefill({ title: 'test', type_id: 1, created_by_user_id: 1, client_id: 1 })
@@ -46,7 +48,7 @@ const isLoading = ref(null)
 const handleSendMessage = debounce(
   async () => {
     isLoading.value = true
-    const { result, error } = await sendMessage(messageInput.value)
+    const { result, error } = await conversationStore.sendMessage(messageInput.value)
 
     errorStatus.value = error?.status
     errorMessage.value = error?.message

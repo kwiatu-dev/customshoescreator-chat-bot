@@ -1,4 +1,4 @@
-import { authState } from '@/store/authStore';
+import { authState } from '@/stores/authStore.js';
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -21,7 +21,7 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => {
-    return { result: response.data ?? null, error: null };
+    return { result: response.data.result ?? null, error: null };
   },
   (error) => {
     return Promise.resolve({ result: null, error: error?.response?.data?.error ?? UNDEFINED_ERROR_MESSAGE });

@@ -1,5 +1,5 @@
 import { requestAuth } from "@/utils/requestAuth.js"
-import { authState, setAuth } from "@/store/authStore"
+import { authState, setAuth } from "@/stores/authStore.js"
 
 export const setupPostMessageListener = (app) => {
     const LARAVEL_APP_BASE_URL = import.meta.env.VITE_LARAVEL_APP_BASE_URL

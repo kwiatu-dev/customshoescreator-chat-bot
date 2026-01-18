@@ -9,12 +9,13 @@ import { getActiveConversation, deactivateConversation } from '../services/conve
 const router = Router();
 
 router.post('/chat', async (req, res) => {
+    const sessionId = req.body.sessionId
     const message = req.body.message
 
     if (!res.headersSent) {
         validateMessage(message)
         
-        const result = await addTimeoutSignalToCallback(async (signal) => await chat(message, signal, req.user), CHAT_TIMEOUT);
+        const result = await addTimeoutSignalToCallback(async (signal) => await chat(sessionId, message, signal, req.user), CHAT_TIMEOUT);
 
         return res.json(ApiResult.success(result));
     }
@@ -23,17 +24,17 @@ router.post('/chat', async (req, res) => {
 router.get('/conversation', async (req, res) => {
     const authHeader = req.headers.authorization;
 
-    const result = await getActiveConversation(authHeader);
+    const { data } = await getActiveConversation(authHeader);
 
-    return res.json(ApiResult.success(result));
+    return res.json(ApiResult.success(data));
 });
 
 router.delete('/conversation', async (req, res) => {
     const authHeader = req.headers.authorization;
 
-    const result = await deactivateConversation(authHeader);
+    const { data } = await deactivateConversation(authHeader);
 
-    return res.json(ApiResult.success(result));
+    return res.json(ApiResult.success(data));
 });
 
 export default router;
