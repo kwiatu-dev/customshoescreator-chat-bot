@@ -14,13 +14,13 @@
         class="flex flex-col p-4"
         :class="{
           'rounded-s-xl rounded-ee-xl bg-gray-300': type === 'human',
-          'rounded-e-xl rounded-es-xl bg-indigo-500': type === 'llm'
+          'rounded-e-xl rounded-es-xl bg-indigo-500': type === 'ai'
         }"
       >
         <p 
           class="text-sm font-normal"
           :class="{
-            'text-gray-50': type === 'llm',
+            'text-gray-50': type === 'ai',
             'text-gray-800': type === 'human' 
           }"
         >
@@ -35,11 +35,11 @@
 import dayjs from 'dayjs'
 import { computed } from 'vue'
 
-const LLM_NAME = 'Asystent AI'
+const AI_NAME = 'Asystent AI'
 
 const name = computed(() => {
-  if (props.type === 'llm')
-    return LLM_NAME
+  if (props.type === 'ai')
+    return AI_NAME
   if (props.type === 'human') 
     return 'Ty'
 
@@ -51,12 +51,12 @@ const props = defineProps({
     required: true,
     type: String,
     validator: (value) => {
-      return ['human', 'llm'].includes(value)
+      return ['human', 'ai'].includes(value)
     },
   },
   time: {
     required: true,
-    type: Date,
+    type: [Date, String],
   },
   message: {
     required: true,

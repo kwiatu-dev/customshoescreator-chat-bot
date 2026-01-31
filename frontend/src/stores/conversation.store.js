@@ -26,32 +26,47 @@ export const useConversationStore = defineStore('conversation', () => {
     }
 
     sessionId.value = response.result.session_id
-    messages.value = response.result.messages || []
+
+    setMessages(response.result.messages)
+
     isLoaded.value = true
     isLoading.value = false
   }
 
   const addUserMessage = (message) => {
-    messages.value.push({})
+    messages.value.push({ type: 'human', content: message, created_at: new Date().toISOString() })
   }
 
   const addAssistantMessage = (message) => {
-    messages.value.push({})
+    messages.value.push({ type: 'ai', content: message, created_at: new Date().toISOString() })
   }
 
   const sendMessage = async (message) => {
+    addUserMessage(message)
+    isLoading.value = true
+
     const response = await apiClient.post('/chat', {
         sessionId: sessionId.value,
         message: message,
     });
 
+    isLoading.value = false
+
+    const answer = response?.result?.answer;
+
     if (response.error === null) {
-        //this.addUserMessage(message)
-        //this.addAssistantMessage(data.reply)
+        addAssistantMessage(answer)
     }
 
     return response
-};
+  };
+
+  const setMessages = async (conversation) => {
+    if (!conversation) return []
+    if (!Array.isArray(conversation)) return []
+
+    messages.value = conversation.map(item => ({ type: item.message.type, content: item.message.content, created_at: item.created_at }));
+  }
 
   return {
     sessionId,

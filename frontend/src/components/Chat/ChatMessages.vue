@@ -1,45 +1,24 @@
 <template>
-     <div class="flex flex-col p-4 gap-4">
-        <!-- <ChatBubble 
-            type="llm"
-            :time="new Date()"
-            message="That's awesome. I think our users will really appreciate the improvements."
+     <div class="flex flex-col p-4 gap-4" v-if="conversationStore.messages.length > 0">
+        <ChatBubble v-for="(message, index) in conversationStore.messages" :key="index"
+            :type="message.type"
+            :time="message.created_at"
+            :message="message.content"
             status="Delivered"
         />
-        <ChatBubble 
-            type="human"
+        <ChatBubble v-if="conversationStore.isLoading"
+            type="ai"
             :time="new Date()"
-            message="That's awesome. I think our users will really appreciate the improvements."
-            status="Delivered"
+            message="Wczytuję odpowiedź..."
+            status="Pending"
         />
+    </div>
+    <div v-else class="flex flex-col p-4 gap-4 text-gray-800">
         <ChatBubble 
-            type="llm"
-            :time="new Date()"
-            message="That's awesome. I think our users will really appreciate the improvements."
-            status="Delivered"
-        />
-        <ChatBubble 
-            type="human"
-            :time="new Date()"
-            message="That's awesome. I think our users will really appreciate the improvements."
-            status="Delivered"
-        />
-        <ChatBubble 
-            type="llm"
-            :time="new Date()"
-            message="That's awesome. I think our users will really appreciate the improvements."
-            status="Delivered"
-        />
-        <ChatBubble 
-            type="human"
-            :time="new Date()"
-            message="That's awesome. I think our users will really appreciate the improvements."
-            status="Delivered"
-        /> -->
-        <div class="text-black">SessionId: {{ conversationStore.sessionId }}</div>
-        <div class="text-black">
-            {{ conversationStore.messages }}
-        </div>
+            type="ai" 
+            :time="new Date()" 
+            message="Cześć! Jestem Asystentem AI. Jak mogę Ci pomóc?" 
+            status="Delivered"/>
     </div>
 </template>
 
@@ -53,8 +32,4 @@ const conversationStore = useConversationStore()
 onMounted(async () => {
     conversationStore.loadConversationOnce()
 })
-
-//** todo
-// 1. wyświetlić instrukcje, jeżeli nie rozpoczęto konwersacji */
-// 2. Załaduj konwersacje
 </script>

@@ -25,18 +25,17 @@
 
 <script setup>
 import { useConversationStore } from '@/stores/conversation.store.js'
-import { redirectToRoute } from '@/utils/redirectToRoute';
 import { requestAuth } from '@/utils/requestAuth';
-import { sendDataToPrefill } from '@/utils/sendDataToPrefill';
 import { debounce } from 'lodash';
 import { ref } from 'vue';
+import { redirectToRoute } from '@/utils/redirectToRoute';
+import { sendDataToPrefill } from '@/utils/sendDataToPrefill';
 
 const DEBOUNCE_TIME = 5000
 
-const messageInput = ref(`Dodaj projekt o tytule 'Ślubne' przypisz go do realizacji przez test2@example.com dla klienta wkonieczny@example.com. Projekt jest do zrealizowania do przyszłego miesiąca. Biorąc pod uwagę, że będzie realizowany około 3 tygodnie ustaw odpowiednią datę rozpoczęcia. Koszt wializacji 50 zł oraz koszt zlecenia 500 zł.`)
+const messageInput = ref(`Dodaj projekt personalizacji butów o tytule 'Ślubne' przypisz go do realizacji przez test2@example.com dla klienta wkonieczny@example.com. Projekt rozpocznę w przyszłym tygodniu i będę go realizować około 3 tygodnie. Koszt wializacji 50 zł oraz koszt zlecenia 500 zł. Klient prosił o dodanie grawerunku na podeszwie.`)
 const errorStatus = ref(null)
 const errorMessage = ref(null)
-const isLoading = ref(null)
 
 const conversationStore = useConversationStore()
 
@@ -45,18 +44,28 @@ const conversationStore = useConversationStore()
 //   const test = await sendDataToPrefill({ title: 'test', type_id: 1, created_by_user_id: 1, client_id: 1 })
 // }
 
+const handleArtifact = async (artifact) => {
+  if (!artifact) return
+  if (!Array.isArray(artifact.actions)) return
+
+  for (const action of artifact.actions) {
+    if (action === 'REDIRECT_TO_ROUTE') {
+      await redirectToRoute(artifact.payload.redirect.route, artifact.payload.redirect.params)
+    } else if (action === 'PREFILL_FORM') {
+      await sendDataToPrefill(artifact.payload.prefill_with_data)
+    }
+  }
+}
+
 const handleSendMessage = debounce(
   async () => {
-    isLoading.value = true
     const { result, error } = await conversationStore.sendMessage(messageInput.value)
 
+    messageInput.value = null
     errorStatus.value = error?.status
     errorMessage.value = error?.message
-
-    if (result)
-      messageInput.value = null
-
-    isLoading.value = false
+      
+    await handleArtifact(result?.artifact)
   }, 
   DEBOUNCE_TIME,
   { leading: true, trailing: true }
