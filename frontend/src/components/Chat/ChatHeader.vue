@@ -35,10 +35,12 @@
         </div>
       </div>
       <button 
+        @click="handleResetConversation"
         class="text-md
         w-4 h-4 p-4 rounded-full
         hover:bg-gray-50/10 
         flex flex-row justify-center items-center
+        cursor-pointer
         z-10" 
       >
         <font-awesome-icon :icon="['fas', 'rotate-right']" />
@@ -48,4 +50,11 @@
 
 <script setup>
 import Logo from '@/images/logo.webp'
+import { useConversationStore } from '@/stores/conversation.store.js'
+
+const conversationStore = useConversationStore()
+
+const handleResetConversation = async () => {
+  await conversationStore.resetConversation()
+}
 </script>

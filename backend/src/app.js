@@ -14,7 +14,7 @@ const TIMEOUT_MS = process.env.APP_TIMEOUT_MS;
 
 app.use(cors({
     origin: [process.env.LARAVEL_API_URL, process.env.FRONTEND_URL], 
-    methods: 'GET,POST',
+    methods: 'GET,POST, PUT, DELETE',   
 }));
 
 app.use(express.json());

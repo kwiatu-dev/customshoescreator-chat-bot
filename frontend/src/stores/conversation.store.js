@@ -8,20 +8,15 @@ export const useConversationStore = defineStore('conversation', () => {
   const messages = ref([])
   const isLoaded = ref(false)
   const isLoading = ref(false)
-  const error = ref(null)
 
-  const loadConversationOnce = async () => {
-    if (isLoaded.value || isLoading.value) return
-
-    isLoading.value = true
-    error.value = null
+  const loadConversation = async () => {
+    if (isLoaded.value) return
 
     await authState.authPromise
 
     const response = await apiClient.get('/conversation')
 
     if (response.error) {
-      error.value = error
       return
     }
 
@@ -30,7 +25,20 @@ export const useConversationStore = defineStore('conversation', () => {
     setMessages(response.result.messages)
 
     isLoaded.value = true
-    isLoading.value = false
+  }
+
+  const deleteConversation = async () => {
+    await apiClient.delete('/conversation')
+  }
+
+  const resetConversation = async () => {
+    await deleteConversation()
+
+    sessionId.value = null
+    messages.value = []
+    isLoaded.value = false
+
+    await loadConversation()
   }
 
   const addUserMessage = (message) => {
@@ -73,10 +81,11 @@ export const useConversationStore = defineStore('conversation', () => {
     messages,
     isLoaded,
     isLoading,
-    error,
-    loadConversationOnce,
+    loadConversationOnce: loadConversation,
     addUserMessage,
     addAssistantMessage,
-    sendMessage
+    sendMessage,
+    resetConversation,
+    deleteConversation,
   }
 })
