@@ -1,34 +1,40 @@
 import { agent } from '../llms/gpt/agent.js'
 import dayjs from 'dayjs'
 import { MAIN_PROMPT } from '../llms/prompts/main_prompt.js'
-import { createMemory } from '../llms/memory/memory.js'
+import { createChatMemory } from '../llms/memory/memory.js'
+import { AIMessage, ToolMessage } from 'langchain'
 
 export const chat = async (sessionId, message, signal, user = null) => {
-  const memory = createMemory(sessionId)
-  const { chat_history } = await memory.loadMemoryVariables({});
+  const chatMemory = createChatMemory(sessionId)
+  const chatHistory = await chatMemory.getMessages();
 
   const prompt = await MAIN_PROMPT.invoke({
-    chat_history,
+    chat_history: chatHistory,
     user_context: formatUserData(user),
     current_date: dayjs().format('YYYY-MM-DD'),
     input: message,
   })
 
-  const response = await agent.invoke(
-    {
-      messages: prompt.toChatMessages()
-    },
-    { signal }
-  )
+  const chatMessages = prompt.toChatMessages();
 
-  const result = processMessages(response.messages)
+  try {
+    const response = await agent.invoke(
+      {
+        messages: chatMessages
+      },
+      { 
+        signal,
+        configurable: {
+          authUser: user,
+        }
+      }
+    )
 
-  await memory.saveContext(
-    { input: message },
-    { output: result.answer } //zastanowic sie czy zapisac tools_cools i inne parametry do bazy danych
-  )
-
-  return result
+    return await processMessages(chatMemory, response.messages.slice(chatMessages.length - 1))
+  }
+  catch (err) {
+    throw err;
+  }
 }
 
 const formatUserData = (user) => ({
@@ -37,34 +43,56 @@ const formatUserData = (user) => ({
     email: user.email,
 })
 
-const processMessages = (messages) => {
+const processMessages = async (chatMemory, messages) => {
   if (!messages) return;
   if (!Array.isArray(messages) || messages.length === 0) return;
 
-  const answer = getAnswer(messages)
-  const artifacts = getArtifacts(messages)
+  updateAiMessagesWithToolContent(messages);
+  
+  await saveContext(chatMemory, messages)
 
-  return { answer, artifact: artifacts.pop() }
+  const answer = getAnswer(messages)
+  const artifact = getArtifact(messages)
+
+  return { answer, artifact }
 }
 
 const getAnswer = (messages) => {
   const lastMessage = messages[messages.length - 1];
 
-  return lastMessage.content ?? null;
+  return lastMessage.content;
 }
 
-const getArtifacts = (messages) => {
-  const artifacts = []
+const getArtifact = (messages) => {
+  const lastMessage = messages[messages.length - 1];
 
-  for (const message of messages) {
-    const artifact = message?.artifact
-
-    if (artifact) {
-      artifacts.push(artifact)
-    }
+  if (lastMessage instanceof ToolMessage) { 
+    return lastMessage?.artifact;
   }
 
-  return artifacts
+  return null
+}
+
+const saveContext = async (chatMemory, messages) => { 
+  for (const message of messages) {
+    await chatMemory.addMessage(message)
+  }
+}
+
+const updateAiMessagesWithToolContent = (messages) => {
+  for (const message of messages) {
+    if (message instanceof ToolMessage) {
+      const tool_call_id = message.tool_call_id;
+
+      const aiMessage = messages.find(
+        (msg) => msg instanceof AIMessage && msg.tool_calls && msg.tool_calls.some(tc => tc.id === tool_call_id)
+      );
+
+      if (aiMessage) {
+        aiMessage.content = message.content;
+      }
+    }
+  }
 }
 
 

@@ -12,3 +12,7 @@ export const PROJECT_STATUSES = [
   "W trakcie realizacji",
   "Zakończone"
 ];
+
+export const PROJECT_SORTABLE_FIELDS = [
+  'title', 'remarks', 'price', 'start', 'deadline', 'end', 'visualization'
+];

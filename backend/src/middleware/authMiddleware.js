@@ -21,6 +21,7 @@ export const authMiddleware = async (req, res, next) => {
         )
         
         req.user = data
+        req.user['token'] = authHeader
         next()
     }
     catch(err) {

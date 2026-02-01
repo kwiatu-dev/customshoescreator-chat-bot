@@ -1,1 +1,2 @@
 export const OPEN_FORM_AND_PREFILL_WITH_DATA = () => `Otwieram formularz i wypełniam go przekazanymi danymi.`
+export const SEARCHING_FOR_PROJECTS = () => `Otwieram listę projektów zgodnie z podanymi kryteriami.`

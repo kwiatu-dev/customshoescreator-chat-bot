@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import apiClient from '@/api/apiClient'
 import { authState } from '@/stores/authStore.js'
 
+const ALLOWED_MESSAGE_TYPES = ['human', 'ai'];
+
 export const useConversationStore = defineStore('conversation', () => {
   const sessionId = ref(null)
   const messages = ref([])
@@ -73,7 +75,7 @@ export const useConversationStore = defineStore('conversation', () => {
     if (!conversation) return []
     if (!Array.isArray(conversation)) return []
 
-    messages.value = conversation.map(item => ({ type: item.message.type, content: item.message.content, created_at: item.created_at }));
+    messages.value = conversation.filter(item => ALLOWED_MESSAGE_TYPES.includes(item.message.type)).map(item => ({ type: item.message.type, content: item.message.content, created_at: item.created_at }));
   }
 
   return {

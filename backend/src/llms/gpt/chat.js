@@ -6,6 +6,6 @@ export const MAX_TOKENS = 200;
 
 export const gpt = new ChatOpenAI({
   model: CHAT_MODEL,
-  streaming: true,
+  streaming: false,
   temperature: 0,
 })
