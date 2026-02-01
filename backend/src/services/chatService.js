@@ -17,6 +17,8 @@ export const chat = async (sessionId, message, signal, user = null) => {
 
   const chatMessages = prompt.toChatMessages();
 
+  console.log(chatMessages.length, 'messages sent to LLM');
+
   try {
     const response = await agent.invoke(
       {
@@ -29,6 +31,8 @@ export const chat = async (sessionId, message, signal, user = null) => {
         }
       }
     )
+
+    console.log('LLM response received');
 
     return await processMessages(chatMemory, response.messages.slice(chatMessages.length - 1))
   }
